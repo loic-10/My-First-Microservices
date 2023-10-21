@@ -1,0 +1,102 @@
+{
+  "name": "checkout",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/checkout/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/checkout",
+        "main": "apps/checkout/src/main.ts",
+        "tsConfig": "apps/checkout/tsconfig.app.json",
+        "assets": ["apps/checkout/src/assets"],
+        "isolatedConfig": true,
+        "webpackConfig": "apps/checkout/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "build:consumer": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/checkout",
+        "main": "apps/checkout/src/consumer.ts",
+        "tsConfig": "apps/checkout/tsconfig.app.json",
+        "assets": ["apps/checkout/src/assets"],
+        "isolatedConfig": true,
+        "webpackConfig": "apps/checkout/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "checkout:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "checkout:build:development"
+        },
+        "production": {
+          "buildTarget": "checkout:build:production"
+        }
+      }
+    },
+    "serve:consumer": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "checkout:build:consumer"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "checkout:build:consumer:development"
+        },
+        "production": {
+          "buildTarget": "checkout:build:consumer:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/checkout/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/checkout/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "docker-build": {
+      "dependsOn": ["build"],
+      "command": "docker build -f apps/checkout/Dockerfile . -t checkout"
+    }
+  },
+  "tags": []
+}

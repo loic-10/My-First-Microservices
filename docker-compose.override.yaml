@@ -1,0 +1,15 @@
+version: '1'
+
+services:
+  nx_ms_app_override:
+    #    restart: always
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+    container_name: nx-ms-app-override
+    environment:
+      - DEV_PLATFORM=DOCKER
+    volumes:
+      - ./:/app
+      - nx-ms-mono-node-modules:/app/node_modules

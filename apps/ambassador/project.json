@@ -1,0 +1,102 @@
+{
+  "name": "ambassador",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/ambassador/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/ambassador",
+        "main": "apps/ambassador/src/main.ts",
+        "tsConfig": "apps/ambassador/tsconfig.app.json",
+        "assets": ["apps/ambassador/src/assets"],
+        "isolatedConfig": true,
+        "webpackConfig": "apps/ambassador/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "build:consumer": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/ambassador",
+        "main": "apps/ambassador/src/consumer.ts",
+        "tsConfig": "apps/ambassador/tsconfig.app.json",
+        "assets": ["apps/ambassador/src/assets"],
+        "isolatedConfig": true,
+        "webpackConfig": "apps/ambassador/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "ambassador:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "ambassador:build:development"
+        },
+        "production": {
+          "buildTarget": "ambassador:build:production"
+        }
+      }
+    },
+    "serve:consumer": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "ambassador:build:consumer"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "ambassador:build:consumer:development"
+        },
+        "production": {
+          "buildTarget": "ambassador:build:consumer:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/ambassador/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/ambassador/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "docker-build": {
+      "dependsOn": ["build"],
+      "command": "docker build -f apps/ambassador/Dockerfile . -t ambassador"
+    }
+  },
+  "tags": []
+}
