@@ -1,0 +1,207 @@
+version: '1.0'
+services:
+  #  email_ms:
+  #    extends:
+  #      file: docker-compose.override.yaml
+  #      service: nx_ms_app_override
+  #    build:
+  #      dockerfile: apps/email/Dockerfile
+  #      target: development
+  #      context: .
+  #    container_name: email-ms
+  #    environment:
+  #      API_1_URL: api-1
+  #      API_2_URL: api-2
+
+  users_ms:
+    extends:
+      file: docker-compose.override.yaml
+      service: nx_ms_app_override
+    build:
+      dockerfile: apps/users/Dockerfile
+      target: development
+      context: .
+    container_name: users-ms
+    environment:
+      DATABASE_TYPE: postgres
+      DATABASE_HOST: postgres_db_ms
+      DATABASE_PORT: 5434
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: users
+      DATABASE_SCHEMA: public
+      DATABASE_SYNCHRONIZE: true
+      DATABASE_AUTO_LOAD_ENTITIES: true
+    ports:
+      - 8001:3000
+    depends_on:
+      - postgres_db_ms
+    networks:
+      - users
+
+  #  users_db:
+  #    image: mysql:8
+  #    restart: always
+  #    container_name: users-db
+  #    environment:
+  #      MYSQL_DATABASE: users
+  #      MYSQL_ROOT_PASSWORD: root
+  #    volumes:
+  #      - .dbdata:/var/lib/mysql
+  #    ports:
+  #      - 33077:3306
+  #    networks:
+  #      - users
+
+  admin_ms_consumer:
+    extends:
+      file: docker-compose.override.yaml
+      service: nx_ms_app_override
+    build:
+      dockerfile: apps/admin/Dockerfile
+      target: development
+      context: .
+    container_name: admin-ms-consumer
+    environment:
+      DATABASE_HOST: postgres_db_ms
+      DATABASE_PORT: 5435
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: admin
+      DATABASE_SCHEMA: public
+      DATABASE_SYNCHRONIZE: true
+    depends_on:
+      - postgres_db_ms
+    networks:
+      - admin
+      - users
+
+  admin_ms:
+    container_name: admin-ms
+    extends: admin_ms_consumer
+    command: npm run admin:serve:dev
+    ports:
+      - 8002:3000
+    depends_on:
+      - admin_ms_consumer
+
+  ambassador_ms_consumer:
+    extends:
+      file: docker-compose.override.yaml
+      service: nx_ms_app_override
+    build:
+      dockerfile: apps/ambassador/Dockerfile
+      target: development
+      context: .
+    container_name: ambassador-ms-consumer
+    environment:
+      DATABASE_HOST: postgres_db_ms
+      DATABASE_PORT: 5436
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: ambassador
+      DATABASE_SCHEMA: public
+      DATABASE_SYNCHRONIZE: true
+    depends_on:
+      - postgres_db_ms
+    networks:
+      - ambassador
+      - users
+
+  ambassador_ms:
+    container_name: ambassador-ms
+    extends: ambassador_ms_consumer
+    command: npm run ambassador:serve:dev
+    ports:
+      - 8003:3000
+    depends_on:
+      - ambassador_ms_consumer
+
+  checkout_ms_consumer:
+    extends:
+      file: docker-compose.override.yaml
+      service: nx_ms_app_override
+    build:
+      dockerfile: apps/checkout/Dockerfile
+      target: development
+      context: .
+    container_name: checkout-ms-consumer
+    environment:
+      DATABASE_HOST: postgres_db_ms
+      DATABASE_PORT: 5437
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: checkout
+      DATABASE_SCHEMA: public
+      DATABASE_SYNCHRONIZE: true
+    depends_on:
+      - postgres_db_ms
+    networks:
+      - checkout
+      - users
+
+  checkout_ms:
+    container_name: checkout-ms
+    extends: checkout_ms_consumer
+    command: npm run checkout:serve:dev
+    ports:
+      - 8004:3000
+    depends_on:
+      - checkout_ms_consumer
+
+  #  admin_db:
+  #    image: mysql:8
+  #    restart: always
+  #    container_name: admin-db
+  #    environment:
+  #      MYSQL_DATABASE: admin
+  #      MYSQL_ROOT_PASSWORD: root
+  #    volumes:
+  #      - .dbdata:/var/lib/mysql
+  #    networks:
+  #      - admin
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - 6379:6379
+    networks:
+      - ambassador
+
+  postgres_db_ms:
+    image: postgres:15-alpine
+    container_name: postgres-db-ms
+    restart: always
+    ports:
+      - 5437:5432
+      - 5436:5432
+      - 5435:5432
+      - 5434:5432
+    volumes:
+      - ./docker-postgres-multiple-dbs.sh:/docker-entrypoint-initdb.d/docker-postgres-multiple-dbs.sh
+      - ./postgres_db_ms:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB_NAMES: admin,users,ambassador,checkout
+    networks:
+      - admin
+      - users
+      - ambassador
+      - checkout
+
+volumes:
+  postgres_db_ms:
+    driver: local
+  nx-ms-mono-node-modules: null
+
+networks:
+  users:
+    name: users
+  ambassador:
+    name: ambassador
+  admin:
+    name: admin
+  checkout:
+    name: checkout
