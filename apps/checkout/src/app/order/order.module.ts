@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -25,7 +25,7 @@ import { KafkaModule } from '../kafka/kafka.module';
     LinkModule,
     ProductModule,
     UserModule,
-    KafkaModule,
+    forwardRef(() => KafkaModule),
   ],
   controllers: [OrderController],
   providers: [OrderService, OrderItemService],

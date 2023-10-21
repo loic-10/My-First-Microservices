@@ -7,11 +7,7 @@ import { UserModule } from '../user/user.module';
 import { KafkaModule } from '../kafka/kafka.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Link]),
-    forwardRef(() => UserModule),
-    KafkaModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Link]), UserModule, KafkaModule],
   controllers: [LinkController],
   providers: [LinkService],
   exports: [LinkService],

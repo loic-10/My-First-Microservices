@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
@@ -23,7 +23,7 @@ import { LinkModule } from './link/link.module';
     }),
     UserModule,
     ProductModule,
-    OrderModule,
+    forwardRef(() => OrderModule),
     LinkModule,
   ],
   controllers: [],

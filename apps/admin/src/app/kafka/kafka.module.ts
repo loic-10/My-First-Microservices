@@ -27,7 +27,7 @@ import { OrderModule } from '../order/order.module';
       },
     ]),
     LinkModule,
-    forwardRef(() => OrderModule),
+    OrderModule,
   ],
   controllers: [KafkaController],
   providers: [KafkaService],
