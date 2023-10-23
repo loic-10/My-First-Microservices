@@ -1,9 +1,10 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { ProductModule } from './product/product.module';
 import { LinkModule } from './link/link.module';
 import { OrderModule } from './order/order.module';
+import { KafkaModule } from './kafka/kafka.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { OrderModule } from './order/order.module';
     ProductModule,
     LinkModule,
     OrderModule,
+    KafkaModule,
   ],
   controllers: [],
   providers: [],

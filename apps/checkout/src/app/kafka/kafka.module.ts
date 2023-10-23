@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { KafkaService } from './kafka.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { KafkaController } from './kafka.controller';
@@ -29,7 +29,7 @@ import { OrderModule } from '../order/order.module';
     ]),
     ProductModule,
     LinkModule,
-    OrderModule,
+    forwardRef(() => OrderModule),
   ],
   controllers: [KafkaController],
   providers: [KafkaService],

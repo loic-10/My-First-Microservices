@@ -1,9 +1,10 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { KafkaService } from './kafka.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { KafkaController } from './kafka.controller';
 import { LinkModule } from '../link/link.module';
 import { OrderModule } from '../order/order.module';
+// import { OrderModule } from '../order/order.module';
 
 @Module({
   imports: [

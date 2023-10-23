@@ -4,6 +4,7 @@ import { UserModule } from './user/user.module';
 import { ProductModule } from './product/product.module';
 import { OrderModule } from './order/order.module';
 import { KafkaModule } from './kafka/kafka.module';
+import { LinkModule } from './link/link.module';
 
 @Module({
   imports: [
@@ -18,9 +19,10 @@ import { KafkaModule } from './kafka/kafka.module';
       synchronize: true,
     }),
     UserModule,
-    forwardRef(() => ProductModule),
+    ProductModule,
     OrderModule,
-    forwardRef(() => KafkaModule),
+    KafkaModule,
+    LinkModule,
   ],
   controllers: [],
   providers: [],
