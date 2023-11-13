@@ -1,22 +1,36 @@
 version: '1.0'
+name: 'mfm'
 services:
-  #  email_ms:
-  #    extends:
-  #      file: docker-compose.override.yaml
-  #      service: nx_ms_app_override
-  #    build:
-  #      dockerfile: apps/email/Dockerfile
-  #      target: development
-  #      context: .
-  #    container_name: email-ms
-  #    environment:
-  #      API_1_URL: api-1
-  #      API_2_URL: api-2
-
-  users_ms:
+  nx_ms_app_override:
     extends:
       file: docker-compose.override.yaml
       service: nx_ms_app_override
+    container_name: nx-ms-app-override
+
+  email_ms:
+    restart: always
+    extends: nx_ms_app_override
+    build:
+      dockerfile: apps/email/Dockerfile
+      target: development
+      context: .
+    container_name: email-ms
+    environment:
+      MST_HOST: redis
+      MST_PORT: 6379
+      MAIL_HOST: sandbox.smtp.mailtrap.io
+      MAIL_PORT: 2525
+      MAIL_USERNAME: 516025233f4bf8
+      MAIL_PASSWORD: 2233d0426b0bf7
+    depends_on:
+      - nx_ms_app_override
+      - redis
+    networks:
+      - email
+
+  users_ms:
+    restart: always
+    extends: nx_ms_app_override
     build:
       dockerfile: apps/users/Dockerfile
       target: development
@@ -35,6 +49,7 @@ services:
     ports:
       - 8001:3000
     depends_on:
+      - nx_ms_app_override
       - postgres_db_ms
     networks:
       - users
@@ -54,9 +69,8 @@ services:
   #      - users
 
   admin_ms_consumer:
-    extends:
-      file: docker-compose.override.yaml
-      service: nx_ms_app_override
+    restart: always
+    extends: nx_ms_app_override
     build:
       dockerfile: apps/admin/Dockerfile
       target: development
@@ -71,12 +85,15 @@ services:
       DATABASE_SCHEMA: public
       DATABASE_SYNCHRONIZE: true
     depends_on:
+      - nx_ms_app_override
       - postgres_db_ms
+      - redis
     networks:
       - admin
       - users
 
   admin_ms:
+    restart: always
     container_name: admin-ms
     extends: admin_ms_consumer
     command: npm run admin:serve:dev
@@ -86,9 +103,8 @@ services:
       - admin_ms_consumer
 
   ambassador_ms_consumer:
-    extends:
-      file: docker-compose.override.yaml
-      service: nx_ms_app_override
+    restart: always
+    extends: nx_ms_app_override
     build:
       dockerfile: apps/ambassador/Dockerfile
       target: development
@@ -103,12 +119,15 @@ services:
       DATABASE_SCHEMA: public
       DATABASE_SYNCHRONIZE: true
     depends_on:
+      - nx_ms_app_override
       - postgres_db_ms
+      - redis
     networks:
       - ambassador
       - users
 
   ambassador_ms:
+    restart: always
     container_name: ambassador-ms
     extends: ambassador_ms_consumer
     command: npm run ambassador:serve:dev
@@ -118,9 +137,8 @@ services:
       - ambassador_ms_consumer
 
   checkout_ms_consumer:
-    extends:
-      file: docker-compose.override.yaml
-      service: nx_ms_app_override
+    restart: always
+    extends: nx_ms_app_override
     build:
       dockerfile: apps/checkout/Dockerfile
       target: development
@@ -136,11 +154,14 @@ services:
       DATABASE_SYNCHRONIZE: true
     depends_on:
       - postgres_db_ms
+      - redis
+      - nx_ms_app_override
     networks:
       - checkout
       - users
 
   checkout_ms:
+    restart: always
     container_name: checkout-ms
     extends: checkout_ms_consumer
     command: npm run checkout:serve:dev
@@ -162,25 +183,29 @@ services:
   #      - admin
 
   redis:
+    restart: always
     image: redis
     container_name: redis
     ports:
       - 6379:6379
     networks:
       - ambassador
+      - email
+      - admin
+      - checkout
 
   postgres_db_ms:
+    restart: always
     image: postgres:15-alpine
     container_name: postgres-db-ms
-    restart: always
     ports:
       - 5437:5432
       - 5436:5432
       - 5435:5432
       - 5434:5432
     volumes:
-      - ./docker-postgres-multiple-dbs.sh:/docker-entrypoint-initdb.d/docker-postgres-multiple-dbs.sh
       - ./postgres_db_ms:/var/lib/postgresql/data
+      - ./docker-postgres-multiple-dbs.sh:/docker-entrypoint-initdb.d/docker-postgres-multiple-dbs.sh
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
@@ -197,6 +222,8 @@ volumes:
   nx-ms-mono-node-modules: null
 
 networks:
+  email:
+    name: email
   users:
     name: users
   ambassador:

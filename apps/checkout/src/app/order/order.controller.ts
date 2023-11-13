@@ -21,6 +21,7 @@ import { InjectStripe } from 'nestjs-stripe';
 import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
 import { KafkaService } from '../kafka/kafka.service';
+import { RedisService } from '../redis/redis.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('orders')
@@ -33,7 +34,8 @@ export class OrderController {
     private connection: Connection,
     @InjectStripe() private readonly stripeClient: Stripe,
     private configService: ConfigService,
-    private kafkaService: KafkaService
+    private kafkaService: KafkaService,
+    private redisService: RedisService
   ) {}
 
   @Post()
@@ -133,7 +135,7 @@ export class OrderController {
 
     await this.orderService.update(order.id, { complete: true });
 
-    await this.kafkaService.emit(
+    await this.redisService.emit(
       ['admin_topic', 'ambassador_topic', 'email_topic'],
       'orderCompleted',
       {

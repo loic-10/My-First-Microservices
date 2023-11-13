@@ -10,13 +10,15 @@ import { LinkService } from './link.service';
 import { User } from '../user/user.decorator';
 import { Link } from './link';
 import { KafkaService } from '../kafka/kafka.service';
+import { RedisService } from '../redis/redis.service';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
 export class LinkController {
   constructor(
     private linkService: LinkService,
-    private kafkaService: KafkaService
+    private kafkaService: KafkaService,
+    private redisService: RedisService
   ) {}
 
   @Post('links')
@@ -26,7 +28,7 @@ export class LinkController {
       user_id: user['id'],
       products: products.map((id) => ({ id })),
     });
-    await this.kafkaService.emit(
+    await this.redisService.emit(
       ['admin_topic', 'checkout_topic'],
       'linkCreated',
       link

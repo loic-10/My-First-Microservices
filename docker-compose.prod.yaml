@@ -1,0 +1,221 @@
+version: '1.0'
+name: 'mfm-prod'
+services:
+  nx_ms_app_override_prod:
+    extends:
+      file: docker-compose.override.yaml
+      service: nx_ms_app_override_prod
+    container_name: nx-ms-app-override-prod
+
+  email_ms_prod:
+    restart: always
+    extends: nx_ms_app_override_prod
+    build:
+      dockerfile: apps/email/Dockerfile
+      target: production
+      context: .
+    container_name: email-ms-prod
+    environment:
+      MST_HOST: redis
+      MST_PORT: 6379
+      MAIL_HOST: sandbox.smtp.mailtrap.io
+      MAIL_PORT: 2525
+      MAIL_USERNAME: 516025233f4bf8
+      MAIL_PASSWORD: 2233d0426b0bf7
+    image: mfm-prod/email:0.0.1
+    depends_on:
+      - nx_ms_app_override_prod
+      - redis
+    networks:
+      - email
+
+  #  users_ms_prod:
+  #    restart: always
+  #    extends: nx_ms_app_override_prod
+  #    build:
+  #      dockerfile: apps/users/Dockerfile
+  #      target: production
+  #      context: .
+  #    container_name: users-ms-prod
+  #    environment:
+  #      DATABASE_TYPE: postgres
+  #      DATABASE_HOST: postgres_db_ms
+  #      DATABASE_PORT: 5434
+  #      DATABASE_USER: root
+  #      DATABASE_PASSWORD: root
+  #      DATABASE_NAME: users
+  #      DATABASE_SCHEMA: public
+  #      DATABASE_SYNCHRONIZE: true
+  #      DATABASE_AUTO_LOAD_ENTITIES: true
+  #    ports:
+  #      - 8001:3000
+  #    depends_on:
+  #      - nx_ms_app_override_prod
+  #      - postgres_db_ms
+  #    networks:
+  #      - users
+  #
+  #  admin_ms_consumer_prod:
+  #    restart: always
+  #    extends: nx_ms_app_override_prod
+  #    build:
+  #      dockerfile: apps/admin/Dockerfile
+  #      target: production
+  #      context: .
+  #    container_name: admin-ms-consumer-prod
+  #    environment:
+  #      DATABASE_HOST: postgres_db_ms
+  #      DATABASE_PORT: 5435
+  #      DATABASE_USER: root
+  #      DATABASE_PASSWORD: root
+  #      DATABASE_NAME: admin
+  #      DATABASE_SCHEMA: public
+  #      DATABASE_SYNCHRONIZE: true
+  #    depends_on:
+  #      - nx_ms_app_override_prod
+  #      - postgres_db_ms
+  #      - redis
+  #    networks:
+  #      - admin
+  #      - users
+  #
+  #  admin_ms_prod:
+  #    restart: always
+  #    extends: admin_ms_consumer_prod
+  #    container_name: admin-ms-prod
+  #    command: npm run admin:serve:prod
+  #    ports:
+  #      - 8002:3000
+  #    depends_on:
+  #      - admin_ms_consumer_prod
+  #
+  #  ambassador_ms_consumer_prod:
+  #    restart: always
+  #    extends: nx_ms_app_override_prod
+  #    build:
+  #      dockerfile: apps/ambassador/Dockerfile
+  #      target: production
+  #      context: .
+  #    container_name: ambassador-ms-consumer-prod
+  #    environment:
+  #      DATABASE_HOST: postgres_db_ms
+  #      DATABASE_PORT: 5436
+  #      DATABASE_USER: root
+  #      DATABASE_PASSWORD: root
+  #      DATABASE_NAME: ambassador
+  #      DATABASE_SCHEMA: public
+  #      DATABASE_SYNCHRONIZE: true
+  #    depends_on:
+  #      - nx_ms_app_override_prod
+  #      - postgres_db_ms
+  #      - redis
+  #    networks:
+  #      - ambassador
+  #      - users
+  #
+  #  ambassador_ms_prod:
+  #    restart: always
+  #    extends: ambassador_ms_consumer_prod
+  #    container_name: ambassador-ms-prod
+  #    command: npm run ambassador:serve:prod
+  #    ports:
+  #      - 8003:3000
+  #    depends_on:
+  #      - ambassador_ms_consumer_prod
+  #
+  #  checkout_ms_consumer_prod:
+  #    restart: always
+  #    extends: nx_ms_app_override_prod
+  #    build:
+  #      dockerfile: apps/checkout/Dockerfile
+  #      target: production
+  #      context: .
+  #    container_name: checkout-ms-consumer-prod
+  #    environment:
+  #      DATABASE_HOST: postgres_db_ms
+  #      DATABASE_PORT: 5437
+  #      DATABASE_USER: root
+  #      DATABASE_PASSWORD: root
+  #      DATABASE_NAME: checkout
+  #      DATABASE_SCHEMA: public
+  #      DATABASE_SYNCHRONIZE: true
+  #    depends_on:
+  #      - postgres_db_ms
+  #      - redis
+  #      - nx_ms_app_override_prod
+  #    networks:
+  #      - checkout
+  #      - users
+  #
+  #  checkout_ms_prod:
+  #    restart: always
+  #    extends: checkout_ms_consumer_prod
+  #    container_name: checkout-ms-prod
+  #    command: npm run checkout:serve:prod
+  #    ports:
+  #      - 8004:3000
+  #    depends_on:
+  #      - checkout_ms_consumer_prod
+
+  #  admin_db:
+  #    image: mysql:8
+  #    restart: always
+  #    container_name: admin-db
+  #    environment:
+  #      MYSQL_DATABASE: admin
+  #      MYSQL_ROOT_PASSWORD: root
+  #    volumes:
+  #      - .dbdata:/var/lib/mysql
+  #    networks:
+  #      - admin
+
+  redis:
+    restart: always
+    image: redis
+    container_name: redis
+    ports:
+      - 6379:6379
+    networks:
+      - ambassador
+      - email
+      - admin
+      - checkout
+
+#  postgres_db_ms:
+#    restart: always
+#    image: postgres:15-alpine
+#    container_name: postgres-db-ms
+#    ports:
+#      - 5437:5432
+#      - 5436:5432
+#      - 5435:5432
+#      - 5434:5432
+#    volumes:
+#      - ./postgres_db_ms:/var/lib/postgresql/data
+#      - ./docker-postgres-multiple-dbs.sh:/docker-entrypoint-initdb.d/docker-postgres-multiple-dbs.sh
+#    environment:
+#      POSTGRES_USER: root
+#      POSTGRES_PASSWORD: root
+#      POSTGRES_DB_NAMES: admin,users,ambassador,checkout
+#    networks:
+#      - admin
+#      - users
+#      - ambassador
+#      - checkout
+
+volumes:
+  postgres_db_ms:
+    driver: local
+  nx-ms-mono-prod-node-modules: null
+
+networks:
+  email:
+    name: email
+  users:
+    name: users
+  ambassador:
+    name: ambassador
+  admin:
+    name: admin
+  checkout:
+    name: checkout

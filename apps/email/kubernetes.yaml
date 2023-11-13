@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f ../../docker-compose.prod.yaml
+    kompose.version: 1.30.0 (9d8dcb518)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: email-ms-prod
+  name: email-ms-prod
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: email-ms-prod
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f ../../docker-compose.prod.yaml
+        kompose.version: 1.30.0 (9d8dcb518)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/email: "true"
+        io.kompose.service: email-ms-prod
+    spec:
+      containers:
+        - env:
+            - name: MAIL_HOST
+              value: sandbox.smtp.mailtrap.io
+            - name: MAIL_PASSWORD
+              value: 2233d0426b0bf7
+            - name: MAIL_PORT
+              value: "2525"
+            - name: MAIL_USERNAME
+              value: 516025233f4bf8
+            - name: MST_HOST
+              value: redis
+            - name: MST_PORT
+              value: "6379"
+          image: mfm-prod/email:0.0.1
+          name: email-ms-prod
+          resources: {}
+          volumeMounts:
+            - mountPath: /app
+              name: email-ms-prod-claim0
+            - mountPath: /app/node_modules
+              name: nx-ms-mono-prod-node-modules
+      restartPolicy: Always
+      volumes:
+        - name: email-ms-prod-claim0
+          persistentVolumeClaim:
+            claimName: email-ms-prod-claim0
+        - name: nx-ms-mono-prod-node-modules
+          persistentVolumeClaim:
+            claimName: nx-ms-mono-prod-node-modules
+status: {}

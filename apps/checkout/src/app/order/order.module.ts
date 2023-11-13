@@ -11,6 +11,7 @@ import { UserModule } from '../user/user.module';
 import { StripeModule } from 'nestjs-stripe';
 import { ConfigService } from '@nestjs/config';
 import { KafkaModule } from '../kafka/kafka.module';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { KafkaModule } from '../kafka/kafka.module';
     ProductModule,
     UserModule,
     forwardRef(() => KafkaModule),
+    forwardRef(() => RedisModule),
   ],
   controllers: [OrderController],
   providers: [OrderService, OrderItemService],

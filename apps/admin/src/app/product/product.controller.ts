@@ -12,12 +12,14 @@ import { ProductService } from './product.service';
 import { ProductCreateDto } from './dtos/product-create.dto';
 import { AuthGuard } from '../user/auth.guard';
 import { KafkaService } from '../kafka/kafka.service';
+import { RedisService } from '../redis/redis.service';
 
 @Controller('products')
 export class ProductController {
   constructor(
     private readonly productService: ProductService,
-    private readonly kafkaService: KafkaService
+    private readonly kafkaService: KafkaService,
+    private readonly redisService: RedisService
   ) {}
 
   @UseGuards(AuthGuard)
@@ -30,7 +32,7 @@ export class ProductController {
   @Post()
   async create(@Body() body: ProductCreateDto) {
     const product = await this.productService.save(body);
-    await this.kafkaService.emit(
+    await this.redisService.emit(
       ['ambassador_topic', 'checkout_topic'],
       'productCreated',
       product
@@ -49,7 +51,7 @@ export class ProductController {
   async update(@Param('id') id: number, @Body() body: ProductCreateDto) {
     await this.productService.update(id, body);
     const product = await this.productService.findOne(id);
-    await this.kafkaService.emit(
+    await this.redisService.emit(
       ['ambassador_topic', 'checkout_topic'],
       'productUpdated',
       product
@@ -61,7 +63,7 @@ export class ProductController {
   @Delete(':id')
   async delete(@Param('id') id: number) {
     const response = await this.productService.delete(id);
-    await this.kafkaService.emit(
+    await this.redisService.emit(
       ['ambassador_topic', 'checkout_topic'],
       'productDeleted',
       { id }

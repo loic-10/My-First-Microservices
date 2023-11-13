@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
@@ -6,6 +6,7 @@ import { ProductModule } from './product/product.module';
 import { OrderModule } from './order/order.module';
 import { LinkModule } from './link/link.module';
 import { KafkaModule } from './kafka/kafka.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { KafkaModule } from './kafka/kafka.module';
     OrderModule,
     LinkModule,
     KafkaModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [],

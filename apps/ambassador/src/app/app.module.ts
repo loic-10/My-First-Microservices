@@ -5,6 +5,7 @@ import { ProductModule } from './product/product.module';
 import { LinkModule } from './link/link.module';
 import { OrderModule } from './order/order.module';
 import { KafkaModule } from './kafka/kafka.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { KafkaModule } from './kafka/kafka.module';
     LinkModule,
     OrderModule,
     KafkaModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [],

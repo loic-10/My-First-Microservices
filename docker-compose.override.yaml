@@ -13,3 +13,14 @@ services:
     volumes:
       - ./:/app
       - nx-ms-mono-node-modules:/app/node_modules
+
+  nx_ms_app_override_prod:
+    #    restart: always
+    build:
+      context: .
+      target: production
+      dockerfile: Dockerfile
+    container_name: nx-ms-app-override-prod
+    volumes:
+      - ./:/app
+      - nx-ms-mono-prod-node-modules:/app/node_modules

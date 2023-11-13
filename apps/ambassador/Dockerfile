@@ -1,19 +1,26 @@
+FROM node:18-alpine as base-files
+
+WORKDIR /app
+COPY . ./
+
+
 FROM node:18-alpine as development
 
 WORKDIR /app
+COPY --from=base-files /app .
+CMD npm run ambassador:serve:consumer:dev
 
-COPY apps/ambassador* nx.json .e* jest* ./
 
-CMD ["npm", "run", "ambassador:serve:consumer:dev"]
+FROM node:18-alpine as builder
+
+WORKDIR /app
+COPY --from=base-files /app .
+RUN npm install -f
+RUN npm run ambassador:build:prod
 
 
 FROM node:18-alpine as production
 
-ENV NODE_ENV=production
-USER node
-
 WORKDIR /app
-
-COPY --from=development /app .
-
-CMD ["npm", "run", "ambassador:serve:consumer:prod"]
+COPY --from=builder /app .
+CMD npm run ambassador:serve:consumer:prod

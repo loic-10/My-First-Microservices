@@ -1,13 +1,14 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { KafkaService } from './kafka.service';
+import { RedisService } from './redis.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { KafkaController } from './kafka.controller';
+import { RedisController } from './redis.controller';
 import { ProductModule } from '../product/product.module';
 import { LinkModule } from '../link/link.module';
 import { OrderModule } from '../order/order.module';
 
 @Module({
   imports: [
+    // TypeOrmModule.forFeature([KafkaError]),
     ClientsModule.register([
       {
         name: 'KAFKA_SERVICE',
@@ -30,8 +31,8 @@ import { OrderModule } from '../order/order.module';
     LinkModule,
     forwardRef(() => OrderModule),
   ],
-  controllers: [KafkaController],
-  providers: [KafkaService],
-  exports: [KafkaService],
+  controllers: [RedisController],
+  providers: [RedisService],
+  exports: [RedisService],
 })
-export class KafkaModule {}
+export class RedisModule {}

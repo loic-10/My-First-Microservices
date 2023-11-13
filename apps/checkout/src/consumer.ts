@@ -13,26 +13,33 @@ async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
-      transport: Transport.KAFKA,
+      transport: Transport.REDIS,
       options: {
-        client: {
-          brokers: ['pkc-lzvrd.us-west4.gcp.confluent.cloud:9092'],
-          ssl: true,
-          sasl: {
-            mechanism: 'plain',
-            username: 'KHD54GDRKYWMIE6A',
-            password:
-              'XOvwNEeRzGQ3GpbIkgZ28fckhqPZoVWOJx4bZ+ymmYBk5TeFEl2utc4L0ET9D8Ut',
-          },
-        },
-        consumer: {
-          groupId: 'checkout-consumer',
-        },
+        host: 'redis',
+        port: 6379,
       },
     }
+    // {
+    //   transport: Transport.KAFKA,
+    //   options: {
+    //     client: {
+    //       brokers: ['pkc-lzvrd.us-west4.gcp.confluent.cloud:9092'],
+    //       ssl: true,
+    //       sasl: {
+    //         mechanism: 'plain',
+    //         username: 'KHD54GDRKYWMIE6A',
+    //         password:
+    //           'XOvwNEeRzGQ3GpbIkgZ28fckhqPZoVWOJx4bZ+ymmYBk5TeFEl2utc4L0ET9D8Ut',
+    //       },
+    //     },
+    //     consumer: {
+    //       groupId: 'checkout-consumer',
+    //     },
+    //   },
+    // }
   );
   app.listen().then(
-    (value) => Logger.log({ admin: 'App is consuming...', value }),
+    (value) => Logger.log({ checkout: 'App is consuming...', value }),
     (reason) => Logger.error({ reason })
   );
 }
